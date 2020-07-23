@@ -50,15 +50,29 @@
 			}).addTo(mymap);
 		}
 
-		function removeControl() {
-			for(var i = 0; i < keepedControls.length; i++) {
-				var item  = keepedControls[i];
+		function clearControls() {
+			for (var i = 0; i < keepedControls.length; i++) {
+				var item = keepedControls[i];
 
 				keepedMap.removeControl(item);
 			}
 		}
 
-		function addControl() {
+		var buildMarker = function (arrLgt, txtPopupHtml, boolWillShowAtStart) {
+			// 打點
+			var marker1 =
+				L.marker(arrLgt).addTo(keepedMap)
+					.bindPopup(txtPopupHtml);
+
+			if (boolWillShowAtStart)
+				marker1.openPopup();
+
+			keepedControls.push(marker1);
+
+			return marker1;
+		}
+
+		var buildCustomMarker = function (arrLgt, txtPopupHtml, boolWillShowAtStart, txtImgUrl) {
 			//----- 客製圖 -----
 			var LeafIcon = L.Icon.extend({
 				options: {
@@ -78,18 +92,19 @@
 				return new L.Icon(options);
 			};
 
-			var customIcon1 = 
-				L.marker([22.646787, 120.253601], { icon: greenIcon }).addTo(keepedMap).bindPopup("I am a green leaf.");
+			var customIcon1 =
+				L.marker(arrLgt, { icon: greenIcon }).addTo(keepedMap);
+
+			if (boolWillShowAtStart)
+				customIcon1.bindPopup(txtPopupHtml);
 
 			keepedControls.push(customIcon1);
 			//----- 客製圖 -----
 
+			return customIcon1;
+		}
 
-			var marker1 = buildMarker([22.647638, 120.252056], "<b>Start</b><br />This is start point.", true);
-			var marker2 = buildMarker([22.652985, 120.251219], "<b>End</b><br />This is end point.", false);
-
-
-
+		var buildAltitude = function (arrLgtArr) {
 			//----- 畫線 -----
 			var geojson =
 			{
@@ -100,36 +115,14 @@
 						"type": "Feature",
 						"geometry": {
 							"type": "LineString",
-							"coordinates": [
-								[120.252056, 22.647638, 020],
-								[120.252271, 22.647737, 030],
-								[120.253, 22.646173, 040],
-								[120.253644, 22.645697, 050],
-								[120.253601, 22.646787, 100],
-								[120.253708, 22.647539, 200],
-								[120.253408, 22.648054, 300],
-								[120.253451, 22.64843, 400],
-								[120.253236, 22.648767, 500],
-								[120.253172, 22.649203, 600],
-								[120.252764, 22.64944, 550],
-								[120.252378, 22.649975, 650],
-								[120.251884, 22.651619, 450],
-								[120.252292, 22.652153, 010],
-								[120.252464, 22.652925, 200],
-								[120.252314, 22.653302, 210],
-								[120.251799, 22.653381, 220],
-								[120.251305, 22.653242, 230],
-								[120.251219, 22.652985, 240]
-							]
+							"coordinates": arrLgtArr
 						}, "properties": null
 					}
 				]
 			};
 
 			var elevationOption = {
-				//position: "topright",
 				position: "bottomleft",
-
 				theme: "steelblue-theme", //default: lime-theme
 				width: 480,
 				height: 100,
@@ -160,34 +153,56 @@
 			var gjl = L.geoJson(geojson, {
 				onEachFeature: el.addData.bind(el)
 			}).addTo(keepedMap);
-			
+
 			keepedControls.push(gjl);
 			//----- 畫線 -----
-		}
 
-		var buildMarker = function(arrLgt, txtPopupHtml, boolWillShowAtStart) {
-			// 打點
-			var marker1 =
-				L.marker(arrLgt).addTo(keepedMap)
-					.bindPopup(txtPopupHtml);
-
-			if(boolWillShowAtStart)
-				marker1.openPopup();
-
-			keepedControls.push(marker1);
-
-			return marker1;
+			return gjl;
 		}
 	</script>
 
 	<script>
-		$("document").ready(function() {
-			$("#btn1").click(function() {
-				addControl();
+		$("document").ready(function () {
+			$("#btn1").click(function () {
+				// 客製圖片打點 ( 做小圖用 )
+				// 緯度、經度， html ，是否要直接打開對話框，圖片路徑
+				var customMarker = buildCustomMarker([22.646787, 120.253601], "I am a green leaf.", false, 'images/mask.png');
+
+				// 打點 
+				var marker1 = buildMarker([22.647638, 120.252056], "<b>Start</b><br />This is start point.", true);
+				var marker2 = buildMarker([22.652985, 120.251219], "<b>End</b><br />This is end point.", false);
+
+				//----- 畫線及海拔圖 -----
+				// 依序為
+				//    經度、緯度、海拔
+				var arrLgtArr = [
+					[120.252056, 22.647638, 020],
+					[120.252271, 22.647737, 030],
+					[120.253000, 22.646173, 040],
+					[120.253644, 22.645697, 050],
+					[120.253601, 22.646787, 100],
+					[120.253708, 22.647539, 200],
+					[120.253408, 22.648054, 300],
+					[120.253451, 22.648430, 400],
+					[120.253236, 22.648767, 500],
+					[120.253172, 22.649203, 600],
+					[120.252764, 22.649440, 550],
+					[120.252378, 22.649975, 650],
+					[120.251884, 22.651619, 450],
+					[120.252292, 22.652153, 010],
+					[120.252464, 22.652925, 200],
+					[120.252314, 22.653302, 210],
+					[120.251799, 22.653381, 220],
+					[120.251305, 22.653242, 230],
+					[120.251219, 22.652985, 240]
+				];
+
+				buildAltitude(arrLgtArr);
+				//----- 畫線及海拔圖 -----
 			});
 
-			$("#btn2").click(function() {
-				removeControl();
+			$("#btn2").click(function () {
+				clearControls();
 			});
 		});
 
