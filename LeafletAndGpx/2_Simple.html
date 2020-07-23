@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+	<title>Quick Start - Leaflet</title>
+
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
+
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+		integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+		crossorigin="" />
+	<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+		integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+		crossorigin=""></script>
+
+
+	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+	<link rel="stylesheet" href="dist/Leaflet.Elevation-0.0.2.css" />
+	<script type="text/javascript" src="dist/Leaflet.Elevation-0.0.2.min.js"></script>
+
+</head>
+
+<body>
+	<h1>Try map</h1>
+
+
+	<div id="mapid" style="width: 800px; height: 600px;"></div>
+	<script>
+		var mymap =
+			L.map('mapid')
+				// 初始
+				.setView(
+					[22.6345, 120.359131], 	// 經緯
+					14					// 縮放等級
+				);
+
+
+		// open topo
+		var OpenTopoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+			maxZoom: 17,
+			attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
+		}).addTo(mymap);
+
+
+		var popup = L.popup();
+
+		function onMapClick(e) {
+			popup
+				.setLatLng(e.latlng)
+				.setContent("You clicked the map at " + e.latlng.toString())
+				.openOn(mymap);
+		}
+
+		mymap.on('click', onMapClick);
+
+
+
+		// 打點
+		L.marker([22.6345, 120.359131]).addTo(mymap)
+			.bindPopup("<b>Hello world!</b><br />I am a popup.").openPopup();
+
+		//----- 畫線 -----
+		var map = mymap;
+		var bounds = new L.LatLngBounds(new L.LatLng(-44.6, 170), new L.LatLng(-45, 168));
+
+		var geojson =
+		{
+			"name": "NewFeatureType",
+			"type": "FeatureCollection",
+			"features": [
+				{
+					"type": "Feature", 
+					"geometry": {
+						"type": "LineString", 
+						"coordinates": [
+						[120.252056, 22.647638, 020],
+						[120.252271, 22.647737, 030],
+						[120.253   , 22.646173, 040],
+						[120.253644, 22.645697, 050],
+						[120.253601, 22.646787, 100],
+						[120.253708, 22.647539, 200],
+						[120.253408, 22.648054, 300],
+						[120.253451, 22.64843,  400],
+						[120.253236, 22.648767, 500],
+						[120.253172, 22.649203, 600],
+						[120.252764, 22.64944,  550],
+						[120.252378, 22.649975, 650],
+						[120.251884, 22.651619, 450],
+						[120.252292, 22.652153, 010],
+						[120.252464, 22.652925, 200],
+						[120.252314, 22.653302, 210],
+						[120.251799, 22.653381, 220],
+						[120.251305, 22.653242, 230],
+						[120.251219, 22.652985, 240]
+						]
+					}, "properties": null
+				}
+			]
+		};
+
+		var elevationOption = {
+			//position: "topright",
+			position: "bottomleft",
+
+			theme: "steelblue-theme", //default: lime-theme
+			width: 480,
+			height: 100,
+			margins: {
+				top: 10,
+				right: 20,
+				bottom: 30,
+				left: 50
+			},
+			useHeightIndicator: true, //if false a marker is drawn at map position
+			interpolation: d3.curveLinear, //see https://github.com/d3/d3-shape/blob/master/README.md#area_curve
+			hoverNumber: {
+				decimalsX: 3, //decimals on distance (always in km)
+				decimalsY: 0, //deciamls on hehttps://www.npmjs.com/package/leaflet.coordinatesight (always in m)
+				formatter: undefined //custom formatter function may be injected
+			},
+			xTicks: undefined, //number of ticks in x axis, calculated by default according to width
+			yTicks: undefined, //number of ticks on y axis, calculated by default according to height
+			collapsed: false,  //collapsed mode, show chart on click or mouseover
+			imperial: false    //display imperial units instead of metric
+		};
+
+		var el = L.control.elevation(elevationOption);
+		el.addTo(map);
+		
+		var gjl = L.geoJson(geojson, {
+			onEachFeature: el.addData.bind(el)
+		}).addTo(map);
+
+		//map.addLayer(service).fitBounds(bounds);
+	//----- 畫線 -----
+
+	</script>
+
+</body>
+
+</html>
