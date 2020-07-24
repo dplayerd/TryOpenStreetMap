@@ -2,27 +2,24 @@
 <html>
 
 <head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
 
 	<title>Quick Start - Leaflet</title>
 
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-	<link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" />
+	<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
 
-	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
-		integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
-		crossorigin="" />
-	<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
-		integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
-		crossorigin=""></script>
-
-	<script src="https://code.jquery.com/jquery-3.5.1.min.js"
-		integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
+	<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 
 	<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
 	<link rel="stylesheet" href="dist/Leaflet.Elevation-0.0.2.css" />
 	<script type="text/javascript" src="dist/Leaflet.Elevation-0.0.2.min.js"></script>
+
+
+	<script type="text/javascript" src="mapHelper.js".js"></script>
 
 </head>
 
@@ -33,144 +30,17 @@
 	<div id="mapid" style="width: 800px; height: 600px;"></div><br />
 	<button type="button" id="btn1">Add</button> &nbsp;
 	<button type="button" id="btn2">Del</button>
-	<script>
-		var keepedControls = [];
-		var keepedMap = null;
-
-		function drawMap() {
-			// 經緯, 縮放等級
-			var mymap = L.map('mapid').setView([22.647638, 120.252056], 15);
-
-			keepedMap = mymap;
-
-			// open topo provider
-			var OpenTopoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-				maxZoom: 17,
-				attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
-			}).addTo(mymap);
-		}
-
-		function clearControls() {
-			for (var i = 0; i < keepedControls.length; i++) {
-				var item = keepedControls[i];
-
-				keepedMap.removeControl(item);
-			}
-		}
-
-		var buildMarker = function (arrLgt, txtPopupHtml, boolWillShowAtStart) {
-			// 打點
-			var marker1 =
-				L.marker(arrLgt).addTo(keepedMap)
-					.bindPopup(txtPopupHtml);
-
-			if (boolWillShowAtStart)
-				marker1.openPopup();
-
-			keepedControls.push(marker1);
-
-			return marker1;
-		}
-
-		var buildCustomMarker = function (arrLgt, txtPopupHtml, boolWillShowAtStart, txtImgUrl) {
-			//----- 客製圖 -----
-			var LeafIcon = L.Icon.extend({
-				options: {
-					shadowUrl: 'leaf-shadow.png',
-					iconSize: [67, 66],
-					shadowSize: [50, 64],
-					iconAnchor: [22, 94],
-					shadowAnchor: [4, 62],
-					popupAnchor: [-3, -76]
-				}
-			});
-
-			// ICON
-			var greenIcon = new LeafIcon({ iconUrl: 'images/mask.png' });
-
-			L.icon = function (options) {
-				return new L.Icon(options);
-			};
-
-			var customIcon1 =
-				L.marker(arrLgt, { icon: greenIcon }).addTo(keepedMap);
-
-			if (boolWillShowAtStart)
-				customIcon1.bindPopup(txtPopupHtml);
-
-			keepedControls.push(customIcon1);
-			//----- 客製圖 -----
-
-			return customIcon1;
-		}
-
-		var buildAltitude = function (arrLgtArr) {
-			//----- 畫線 -----
-			var geojson =
-			{
-				"name": "NewFeatureType",
-				"type": "FeatureCollection",
-				"features": [
-					{
-						"type": "Feature",
-						"geometry": {
-							"type": "LineString",
-							"coordinates": arrLgtArr
-						}, "properties": null
-					}
-				]
-			};
-
-			var elevationOption = {
-				position: "bottomleft",
-				theme: "steelblue-theme", //default: lime-theme
-				width: 480,
-				height: 100,
-				margins: {
-					top: 10,
-					right: 20,
-					bottom: 30,
-					left: 50
-				},
-				useHeightIndicator: true, //if false a marker is drawn at map position
-				interpolation: d3.curveLinear, //see https://github.com/d3/d3-shape/blob/master/README.md#area_curve
-				hoverNumber: {
-					decimalsX: 3, //decimals on distance (always in km)
-					decimalsY: 0, //deciamls on hehttps://www.npmjs.com/package/leaflet.coordinatesight (always in m)
-					formatter: undefined //custom formatter function may be injected
-				},
-				xTicks: undefined, //number of ticks in x axis, calculated by default according to width
-				yTicks: undefined, //number of ticks on y axis, calculated by default according to height
-				collapsed: false,  //collapsed mode, show chart on click or mouseover
-				imperial: false    //display imperial units instead of metric
-			};
-
-			var el = L.control.elevation(elevationOption);
-			el.addTo(keepedMap);
-
-			keepedControls.push(el);
-
-			var gjl = L.geoJson(geojson, {
-				onEachFeature: el.addData.bind(el)
-			}).addTo(keepedMap);
-
-			keepedControls.push(gjl);
-			//----- 畫線 -----
-
-			return gjl;
-		}
-	</script>
 
 	<script>
 		$("document").ready(function () {
 			$("#btn1").click(function () {
 				// 客製圖片打點 ( 做小圖用 )
 				// 緯度、經度， html ，是否要直接打開對話框，圖片路徑
-				var customMarker = buildCustomMarker([22.646787, 120.253601], "I am a green leaf.", false, 'images/mask.png');
+				var customMarker = mapHelper.buildCustomMarker([22.646787, 120.253601], "I am a green leaf.", false, 'images/mask.png');
 
 				// 打點 
-				var marker1 = buildMarker([22.647638, 120.252056], "<b>Start</b><br />This is start point.", true);
-				var marker2 = buildMarker([22.652985, 120.251219], "<b>End</b><br />This is end point.", false);
+				var marker1 = mapHelper.buildMarker([22.647638, 120.252056], "<b>Start</b><br />This is start point.", true);
+				var marker2 = mapHelper.buildMarker([22.652985, 120.251219], "<b>End</b><br />This is end point.", false);
 
 				//----- 畫線及海拔圖 -----
 				// 依序為
@@ -197,16 +67,16 @@
 					[120.251219, 22.652985, 240]
 				];
 
-				buildAltitude(arrLgtArr);
+				mapHelper.buildAltitude(arrLgtArr);
 				//----- 畫線及海拔圖 -----
 			});
 
 			$("#btn2").click(function () {
-				clearControls();
+				mapHelper.clearControls();
 			});
 		});
 
-		drawMap();
+		mapHelper.drawMap('mapid', [22.647638, 120.252056], 15, 17);
 	</script>
 </body>
 
